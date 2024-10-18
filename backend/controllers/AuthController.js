@@ -8,7 +8,9 @@ const AuthController = {
 
     try {
       // Create user in the database and default admin as false
-      User.create(name, username, email, password, address, 0, isSeller, (err, userId) => {
+      // User.create(name, username, email, password, address, 0, isSeller, (err, userId) => {
+
+      User.create(name, username, email, password, address, isAdmin, isSeller, (err, userId) => {
         if (err) {
           return res.status(500).json({ error: err.message });
         }
