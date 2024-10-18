@@ -44,7 +44,7 @@ User Cristobal_Lang26 added with ID 7
 
 The seed consist of manual and randomize data. Here's the manual data that can be use.
 
-```json
+```
 user {
     name: "Admin"
     email:"admin@example.com",
