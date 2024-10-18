@@ -1,0 +1,3 @@
+const NavbarDashboard = () => {
+  return <></>;
+};

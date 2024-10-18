@@ -4,7 +4,6 @@ const bcrypt = require("bcrypt");
 class User {
   static async create(name, username, email, password, address, isAdmin, isSeller, callback) {
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log(hashedPassword);
     const query = `
           INSERT INTO users (name, username, email, password, address, isAdmin, isSeller) 
           VALUES (?, ?, ?, ?, ?, ?, ?)
@@ -30,13 +29,17 @@ class User {
     });
   }
 
-  static update(id, name, email, password, isAdmin, isSeller, callback) {
+  static update(id, name, email, password, isAdmin, isSeller, address, username, callback) {
     const query = `UPDATE users 
-                   SET name = ?, email = ?, password = ?, isAdmin = ?, isSeller = ? 
+                   SET name = ?, email = ?, password = ?, isAdmin = ?, isSeller = ?, address = ?, username = ? 
                    WHERE id = ?`;
-    db.run(query, [name, email, password, isAdmin, isSeller, id], function (err) {
-      callback(err, this.changes); // Returns number of rows affected
-    });
+    db.run(
+      query,
+      [name, email, password, isAdmin, isSeller, address, username, id],
+      function (err) {
+        callback(err, this.changes); // Returns number of rows affected
+      }
+    );
   }
 
   static delete(id, callback) {

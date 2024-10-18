@@ -3,8 +3,7 @@ const sqlite3 = require("sqlite3").verbose();
 const db = new sqlite3.Database("./db.sqlite");
 
 db.serialize(() => {
-  db.run(`DROP TABLE IF EXISTS users;
-  `);
+  // db.run(`DROP TABLE IF EXISTS transactions;`);
   // Create users table
   db.run(`CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -23,9 +22,11 @@ db.serialize(() => {
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     sellerId INTEGER,
     title TEXT,
+    desc TEXT,
     store Text,
     price REAL,
     stock INTEGER,
+    image TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (sellerId) REFERENCES users(id)
   )`);
@@ -59,6 +60,7 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS transactions (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   buyerId INTEGER,
+  payment TEXT,
   total REAL,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   FOREIGN KEY (buyerId) REFERENCES users(id)

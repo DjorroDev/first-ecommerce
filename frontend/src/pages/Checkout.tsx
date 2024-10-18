@@ -24,7 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@radix-ui/react-label";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -45,10 +45,18 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { DialogClose } from "@radix-ui/react-dialog";
+import { useCreateOrderMutation } from "@/services/orderService";
+import { useRegisterMutation } from "@/services/authService";
+import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useGetUsersQuery } from "@/services/userService";
 
 const Checkout = () => {
   const { items, totalQuantity, totalPrice } = useAppSelector((state) => state.cart);
+  const { token, user } = useAppSelector((state) => state.auth);
 
+  const navigate = useNavigate();
+  const [create] = useCreateOrderMutation();
   const paymentMethods = [
     {
       id: "magic-card",
@@ -66,12 +74,67 @@ const Checkout = () => {
       icon: <Leaf className="mr-2" />,
     },
   ];
-
   const [pay, setPay] = useState({
     id: "",
     name: "",
     icon: <></>,
   });
+
+  const [registerForm, setRegisterForm] = useState({
+    name: "",
+    email: "",
+    username: "",
+    password: "",
+    address: "",
+    isAdmin: false,
+    isSeller: false,
+  });
+
+  const [register, { isLoading, error }] = useRegisterMutation();
+  const { data: users } = useGetUsersQuery();
+
+  const lastUserId = users && users.length > 0 ? users[users.length - 1].id : null;
+  const displayUserId = lastUserId ?? 0;
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    setRegisterForm({
+      ...registerForm,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setRegisterForm({
+      ...registerForm,
+      [e.target.name]: e.target.checked,
+    });
+  };
+
+  const handleRegister = async () => {
+    try {
+      await register(registerForm).unwrap;
+    } catch (err) {
+      console.error(err);
+      console.error(error);
+    }
+  };
+
+  const handleOrder = async () => {
+    try {
+      await create({ buyerId: displayUserId + 1, payment: pay.name, cartItems: items });
+      navigate("/products");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const handlePayment = async () => {
+    console.log("p");
+    if (!token) {
+      await handleRegister();
+    }
+    await handleOrder();
+  };
 
   return (
     <>
@@ -108,41 +171,115 @@ const Checkout = () => {
               </TableRow>
             </TableFooter>
           </Table>
-          <div>
-            <h2 className="text-2xl text-center mb-3">
-              Checkout while Registering Account or{" "}
-              <Link to="" className="text-2xl text-center">
-                Login
-              </Link>
-            </h2>
-
+          {!token && (
             <div>
-              <div className="grid gap-4">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input id="email" type="email" placeholder="m@example.com" required />
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
+              <h2 className="text-2xl text-center mb-3">
+                Checkout while Registering Account or
+                <Link to="/login" className="text-2xl text-center ml-2">
+                  Login here
+                </Link>
+              </h2>
+              <div>
+                <form className="grid gap-4">
                   <div className="grid gap-2">
-                    <Label htmlFor="first-name">First name</Label>
-                    <Input id="first-name" placeholder="Max" required />
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      placeholder="m@example.com"
+                      value={registerForm.email}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
                   <div className="grid gap-2">
-                    <Label htmlFor="last-name">Last name</Label>
-                    <Input id="last-name" placeholder="Robinson" required />
+                    <Label htmlFor="username">Username</Label>
+                    <Input
+                      id="username"
+                      name="username"
+                      placeholder="johnDoe / JohnStore"
+                      value={registerForm.username}
+                      onChange={handleChange}
+                      required
+                    />
                   </div>
-                </div>
-                <div className="grid gap-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input id="address" placeholder="Robinson" required />
-                </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="password">Password</Label>
+                    <Input
+                      id="password"
+                      name="password"
+                      type="password"
+                      value={registerForm.password}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="Roles">Roles</Label>
+                    <div className="flex gap-2">
+                      <Checkbox
+                        id="isSeller"
+                        name="isSeller"
+                        // value={registerForm.isSeller}
+                        checked={registerForm.isSeller}
+                        // onChange={handleCheckboxChange}
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange({
+                            target: {
+                              name: "isSeller",
+                              checked,
+                            },
+                          } as React.ChangeEvent<HTMLInputElement>)
+                        }
+                      />
+                      <Label htmlFor="isSeller">Seller</Label>
+                    </div>
+                    <div className="flex gap-2">
+                      <Checkbox
+                        id="isAdmin"
+                        name="isAdmin"
+                        checked={registerForm.isAdmin}
+                        onCheckedChange={(checked) =>
+                          handleCheckboxChange({
+                            target: {
+                              name: "isAdmin",
+                              checked,
+                            },
+                          } as React.ChangeEvent<HTMLInputElement>)
+                        }
+                      />
+                      <Label htmlFor="isAdmin">Admin</Label>
+                    </div>
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="name">Full name</Label>
+                    <Input
+                      id="name"
+                      name="name"
+                      placeholder="John Doe"
+                      value={registerForm.name}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="address">Address</Label>
+                    <Textarea
+                      id="address"
+                      name="address"
+                      placeholder="Your address"
+                      value={registerForm.address}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+
+                  {error && <p className="text-red-500 text-sm">error</p>}
+                </form>
               </div>
             </div>
-          </div>
+          )}
         </div>
 
         <Card className="md:w-96 h-fit">
@@ -192,7 +329,7 @@ const Checkout = () => {
             {/* <div>Credit card</div> */}
           </CardContent>
           <CardFooter>
-            <Button className="w-full">
+            <Button onClick={() => handlePayment()} className="w-full">
               Pay
               <DollarSign className="ml-2 h-4 w-4" />
               {totalPrice}

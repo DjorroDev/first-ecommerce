@@ -1,6 +1,6 @@
 // src/features/cart/cartSlice.js
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { CartItem, CartState } from './cartTypes';
+import { CartItem, CartState } from '@/types';
 
 // Helper function for LocalStorage
 const loadCartFromLocalStorage = (): CartState => {

@@ -2,9 +2,9 @@
 const db = require("../database/db");
 
 class Item {
-  static create(sellerId, title, store, price, stock, callback) {
-    const query = `INSERT INTO items (sellerId, title, store, price, stock) VALUES (?, ?, ?, ?, ?)`;
-    db.run(query, [sellerId, title, store, price, stock], function (err) {
+  static create(sellerId, title, desc, store, price, stock, image, callback) {
+    const query = `INSERT INTO items (sellerId, title, desc, store, price, stock, image) VALUES (?, ?, ?, ?, ?, ?, ?)`;
+    db.run(query, [sellerId, title, desc, store, price, stock, image], function (err) {
       callback(err, this.lastID);
     });
   }
@@ -23,9 +23,17 @@ class Item {
     });
   }
 
-  static update(id, sellerId, title, store, price, stock, callback) {
-    const query = `UPDATE items SET sellerId = ?, title = ?, store = ?, price = ?, stock = ? WHERE id = ?`;
-    db.run(query, [sellerId, title, store, price, stock, id], function (err) {
+  static getBySellerId(id, callback) {
+    const query = `SELECT * FROM items WHERE sellerId = ?`;
+    db.all(query, [id], (err, rows) => {
+      callback(err, rows);
+    });
+  }
+
+  static update(id, sellerId, title, desc, store, price, stock, image, callback) {
+    const query = `UPDATE items SET sellerId = ?, title = ?, desc = ?, store = ?, price = ?, stock = ?, image = ? WHERE id = ?`;
+    db.run(query, [sellerId, title, desc, store, price, stock, image, id], function (err) {
+      // console.log(this.c)
       callback(err, this.changes);
     });
   }

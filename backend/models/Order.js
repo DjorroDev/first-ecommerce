@@ -1,15 +1,15 @@
 const db = require("../database/db");
 
 class Order {
-  static create(buyerId, cartItems, callback) {
+  static create(buyerId, payment, cartItems, callback) {
     // Create transaction to track all the order in one place
-    const createTransaction = `INSERT INTO transactions (buyerId, total)
-                                   VALUES (?, ?)`;
+    const createTransaction = `INSERT INTO transactions (buyerId, payment, total)
+                                   VALUES (?, ?, ?)`;
 
     const groupedItems = groupItemsBySeller(cartItems); // Group items by seller
 
     let totalTransaction = 0;
-    db.run(createTransaction, [buyerId, totalTransaction], function (err) {
+    db.run(createTransaction, [buyerId, payment, totalTransaction], function (err) {
       if (err) return callback(err);
 
       const transactionId = this.lastID;
@@ -58,6 +58,33 @@ class Order {
           }
         );
       });
+    });
+  }
+
+  static getOrderBySellerId(sellerId, callback) {
+    db.all("SELECT * FROM orders WHERE sellerId = ?", [sellerId], (err, orders) => {
+      if (err) return callback(err);
+
+      // Fetch items for each order
+      const ordersWithItems = orders.map((order) => {
+        return new Promise((resolve, reject) => {
+          db.all("SELECT * FROM order_items WHERE orderId = ?", [order.id], (err, items) => {
+            if (err) reject(err);
+            resolve({ ...order, items });
+          });
+        });
+      });
+
+      Promise.all(ordersWithItems)
+        .then((results) => callback(null, results))
+        .catch(callback);
+    });
+  }
+
+  static getTransactionByBuyerId(buyerId, callback) {
+    const query = `SELECT * FROM transactions WHERE buyerId = ?`;
+    db.all(query, [buyerId], (err, rows) => {
+      callback(err, rows);
     });
   }
 

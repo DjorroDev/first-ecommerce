@@ -18,7 +18,12 @@ const AuthController = {
           expiresIn: "1h",
         });
 
-        res.status(201).json({ message: "User registered successfully", token, userId });
+        User.findById(userId, async (err, user) => {
+          if (err || !user) {
+            return res.status(401).json({ error: "Invalid credentials" });
+          }
+          res.status(201).json({ message: "User registered successfully", token, user });
+        });
       });
     } catch (error) {
       res.status(500).json({ error: "Error during registration" });
@@ -48,9 +53,7 @@ const AuthController = {
       );
 
       // Return token
-      res
-        .status(200)
-        .json({ token, userId: user.id, isAdmin: user.isAdmin, isSeller: user.isSeller });
+      res.status(200).json({ token, user });
     });
   },
 
