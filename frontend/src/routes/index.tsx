@@ -15,6 +15,7 @@ import Products from "@/pages/dashboard/products";
 import Transactions from "@/pages/Transactions";
 import Admin from "@/pages/dashboard/Admin";
 import Orders from "@/pages/dashboard/Orders";
+import PrivateRoutes from "@/utils/ProtectedRoutes";
 
 const router = createBrowserRouter([
   {
@@ -57,31 +58,32 @@ const router = createBrowserRouter([
   },
   {
     path: "/dashboard",
-    element: <DashboardLayout />,
+    element: <PrivateRoutes />,
     children: [
       {
-        path: "/dashboard",
-        element: <Dashboard />,
-      },
-      {
-        path: "/dashboard/products",
-        element: <Products />,
-      },
-      {
-        path: "/dashboard/admin",
-        element: <Admin />,
-      },
-      {
-        path: "/dashboard/orders",
-        element: <Orders />,
+        path: "",
+        element: <DashboardLayout />,
+        children: [
+          {
+            path: "",
+            element: <Dashboard />,
+          },
+          {
+            path: "products",
+            element: <Products />,
+          },
+          {
+            path: "admin",
+            element: <Admin />,
+          },
+          {
+            path: "orders",
+            element: <Orders />,
+          },
+        ],
       },
     ],
   },
-
-  // {
-  //     path: "/cart",
-  //     element: <Cart />,
-  // },
 ]);
 
 export default router;

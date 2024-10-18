@@ -121,8 +121,8 @@ const Checkout = () => {
 
   const handleOrder = async () => {
     try {
-      await create({ buyerId: displayUserId + 1, payment: pay.name, cartItems: items });
-      navigate("/products");
+      await create({ buyerId: user?.id || displayUserId + 1, payment: pay.name, cartItems: items });
+      navigate("/transactions");
     } catch (err) {
       console.error(err);
     }
@@ -328,8 +328,13 @@ const Checkout = () => {
             </Dialog>
             {/* <div>Credit card</div> */}
           </CardContent>
-          <CardFooter>
-            <Button onClick={() => handlePayment()} className="w-full">
+          <CardFooter className="flex-col">
+            {pay.id === "" && <p className="text-sm text-muted-foreground">click choose payment</p>}
+            <Button
+              onClick={() => handlePayment()}
+              disabled={pay.id === "" ? true : false}
+              className="w-full"
+            >
               Pay
               <DollarSign className="ml-2 h-4 w-4" />
               {totalPrice}
