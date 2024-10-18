@@ -5,6 +5,8 @@
 Express, sqlite, react, redux rtk query
 For UI using shadcn/ui
 
+With ui framework I manage to make the website work on mobile version (up to around 450px width)
+
 ## Install
 
 install to both frontend & backend
@@ -74,6 +76,22 @@ dropAndRecreateTables();
 
 seedDatabase();
 ```
+
+## Start the web
+
+```
+> cd backend/
+> npm run serve
+```
+
+```
+> cd frontend/
+> npm run dev
+```
+
+### Note:
+
+it never tested in cloud environment. Already tested local.
 
 ## Last word
 
